@@ -34,3 +34,13 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+Something went wrong. Please check the error below for more details.
+If the problem persists, please open an issue on GitHub.
+
+Unexpected token '<', "<!doctype "... is not valid JSON
+
+You can also try a previous version to see if that works:
+npx shadcn@4.12.0 add @react-bits/LightRays-JS-CSSecho '# devEventsNextJS16Project1'
+
