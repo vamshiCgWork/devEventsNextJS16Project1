@@ -40,23 +40,20 @@ bookingSchema.pre("save", async function (next) {
     try {
       const eventExists = await Event.findById(this.eventId);
       if (!eventExists) {
-        // @ts-ignore
-        return next(
+
             new Error(`Event with ID ${this.eventId} does not exist`)
-        );
+
       }
     } catch (error) {
-      // @ts-ignore
-      return next(
+
           new Error(
               `Error validating event: ${error instanceof Error ? error.message : "Unknown error"}`
-          )
+
       );
     }
   }
 
-  // @ts-ignore
-  next();
+
 });
 
 // Create or retrieve the Booking model
