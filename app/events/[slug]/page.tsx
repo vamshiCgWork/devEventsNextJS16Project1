@@ -1,6 +1,7 @@
 import React from 'react'
 import {notFound} from "next/navigation";
 import Image from "next/image";
+import BookEvent from "@/components/BookEvent";
 
 const Page =async ({params}:{params:Promise<{slug:string}>}) => {
    const {slug} = await params
@@ -36,6 +37,9 @@ const Page =async ({params}:{params:Promise<{slug:string}>}) => {
 
     const { description, image, overview, date, time, location, mode, agenda, audience, tags, organizer } = data;
     if(!description) return notFound()
+
+    const bookings = 10;
+
     return (
         <section id="event">
             <div className="header">
@@ -62,18 +66,29 @@ const Page =async ({params}:{params:Promise<{slug:string}>}) => {
                         <EventDetailItem icon="/icons/audience.svg" alt="audience" label={audience} />
                     </section>
 
-                    <EventAgenda agendaItems={JSON.parse(agenda[0])} />
+                    <EventAgenda agendaItems={agenda} />
 
                     <section className="flex-col-gap-2">
                         <h2>About the Organizer</h2>
                         <p>{organizer}</p>
                     </section>
 
-                    <EventTags tags={JSON.parse(tags[0])} />
+                    <EventTags tags={tags} />
                 </div>
                 {/*    Right Side - Booking Form */}
                 <aside className="booking">
-                    <p className={"text-lg font-semibold"}>Book Event</p>
+                    <div className="signup-card">
+                        <h2>Book Your Spot</h2>
+                        {bookings > 0 ? (
+                            <p className="text-sm">
+                                Join {bookings} people who have already booked their spot!
+                            </p>
+                        ): (
+                            <p className="text-sm">Be the first to book your spot!</p>
+                        )}
+
+                        <BookEvent eventId={data._id} slug={data.slug} />
+                    </div>
                 </aside>
             </div>
        </section>
