@@ -1,13 +1,25 @@
 import ExploreBtn from "@/components/ExploreBtn";
 import EventCard from "@/components/EventCard";
-import {IEvent} from "@/database";
+import { Event, type IEvent } from "@/database";
+import { connectDB } from "@/lib/mongodb";
 //import {events} from "@/lib/constants";
 
 
 const Page = async () => {
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/events`)
-    const {events} = await response.json()
+    // Load events directly from the database during server-side rendering.
+    // Calling internal API routes during `next build` can fail (ECONNREFUSED) because
+    // the serverless dev server is not running. Querying the DB here avoids that.
+    let events: IEvent[] = [];
+    try {
+      await connectDB();
+      events = (await Event.find().lean().exec()) as IEvent[];
+    } catch (err) {
+      // Log and continue with empty events to allow prerender to succeed
+      // (alternatively surface an error page if desired)
+      // eslint-disable-next-line no-console
+      console.error("Failed to load events for page:", err);
+    }
 
     return (
         <section>
