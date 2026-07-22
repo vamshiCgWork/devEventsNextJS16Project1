@@ -3,13 +3,15 @@ import {notFound} from "next/navigation";
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import {IEvent} from "@/database";
-import {getSimilarEventsBySlug} from "@/lib/actions/events.actions";
+import {getEventBySlug, getSimilarEventsBySlug} from "@/lib/actions/events.actions";
 import EventCard from "@/components/EventCard";
 
 const Page =async ({params}:{params:Promise<{slug:string}>}) => {
    const {slug} = await params
-   const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/events/${slug}`)
-    const data = await response.json()
+const [data, similarEvents] = await Promise.all([
+    getEventBySlug(slug),
+    getSimilarEventsBySlug(slug)
+]);
     const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; label: string; }) => (
         <div className="flex-row-gap-2 items-center">
             <Image src={icon} alt={alt} width={17} height={17} />
@@ -41,7 +43,7 @@ const Page =async ({params}:{params:Promise<{slug:string}>}) => {
 
     const bookings = 10;
 
-    const similarEvents :IEvent[] = await getSimilarEventsBySlug(slug)
+    //const similarEvents :IEvent[] = await getSimilarEventsBySlug(slug)
     return (
         <section id="event">
             <div className="header">
