@@ -1,31 +1,31 @@
 'use server'
 
-import {connectDB} from "@/lib/mongodb";
+import { connectDB } from "@/lib/mongodb";
 import Event from "@/database/event.model"
 
-export const getEventBySlug = async (slug:string)=>{
-
-    if(!slug || typeof slug !== "string" || !slug.trim()){
+export const getEventBySlug = async (slug: string) => {
+    if (!slug || typeof slug !== "string" || !slug.trim()) {
         throw new Error("Missing or invalid slug");
     }
 
     await connectDB()
-    const event = await Event.findOne({slug:slug.trim()}).lean().exec()
+    const event = await Event.findOne({ slug: slug.trim() }).lean().exec()
 
-    if (!event){
+    if (!event) {
         throw new Error("Event not found")
     }
-    return event
+    return JSON.parse(JSON.stringify(event));
 }
 
-export const getSimilarEventsBySlug = async (slug:string)=>{
+export const getSimilarEventsBySlug = async (slug: string) => {
     try {
         await connectDB()
-        const event = await Event.findOne({slug})
-        return  await Event.find({_id:{$ne:event._id}, tags:{$in:event.tags}}).lean().exec()
-
+        const event = await Event.findOne({ slug })
+        if (!event) return [];
+        const similarEvents = await Event.find({ _id: { $ne: event._id }, tags: { $in: event.tags } }).lean().exec();
+        return JSON.parse(JSON.stringify(similarEvents));
     }
-    catch (error){
+    catch (error) {
         return []
     }
 }
