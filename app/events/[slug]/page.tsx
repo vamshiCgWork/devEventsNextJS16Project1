@@ -8,10 +8,13 @@ import EventCard from "@/components/EventCard";
 
 const Page =async ({params}:{params:Promise<{slug:string}>}) => {
    const {slug} = await params
-const [data, similarEvents] = await Promise.all([
-    getEventBySlug(slug),
-    getSimilarEventsBySlug(slug)
-]);
+    const [data, similarEvents] = await Promise.all([
+        getEventBySlug(slug),
+        getSimilarEventsBySlug(slug)
+    ]);
+
+    if (!data) return notFound();
+
     const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; label: string; }) => (
         <div className="flex-row-gap-2 items-center">
             <Image src={icon} alt={alt} width={17} height={17} />
@@ -23,7 +26,7 @@ const [data, similarEvents] = await Promise.all([
         <div className="agenda">
             <h2>Agenda</h2>
             <ul>
-                {agendaItems.map((item) => (
+                {agendaItems?.map((item) => (
                     <li key={item}>{item}</li>
                 ))}
             </ul>
@@ -32,14 +35,13 @@ const [data, similarEvents] = await Promise.all([
 
     const EventTags = ({ tags }: { tags: string[] }) => (
         <div className="flex flex-row gap-1.5 flex-wrap">
-            {tags.map((tag) => (
+            {tags?.map((tag) => (
                 <div className="pill" key={tag}>{tag}</div>
             ))}
         </div>
     )
 
     const { description, image, overview, date, time, location, mode, agenda, audience, tags, organizer } = data;
-    if(!description) return notFound()
 
     const bookings = 10;
 
