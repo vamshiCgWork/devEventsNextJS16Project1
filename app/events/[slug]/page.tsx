@@ -55,7 +55,7 @@ const Page =async ({params}:{params:Promise<{slug:string}>}) => {
             <div className="details">
                 {/*    Left Side - Event Content */}
                 <div className="content">
-                    <Image src={image} alt="Event Banner" width={800} height={800} className="banner" />
+                    <Image src={image} alt="Event Banner" width={800} height={800} priority sizes="(max-width: 1024px) 100vw, 66vw" className="banner" />
 
                     <section className="flex-col-gap-2">
                         <h2>Overview</h2>
