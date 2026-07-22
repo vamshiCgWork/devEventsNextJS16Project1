@@ -5,6 +5,8 @@ import { connectDB } from "@/lib/mongodb";
 //import {events} from "@/lib/constants";
 
 
+export const dynamic = 'force-dynamic';
+
 const Page = async () => {
 
     // Load events directly from the database during server-side rendering.

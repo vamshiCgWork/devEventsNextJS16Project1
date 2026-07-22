@@ -1,7 +1,8 @@
 'use server'
 
 import { connectDB } from "@/lib/mongodb";
-import Event from "@/database/event.model"
+import Event from "@/database/event.model";
+import { revalidatePath } from "next/cache";
 
 export const getEventBySlug = async (slug: string) => {
     if (!slug || typeof slug !== "string" || !slug.trim()) {
@@ -79,6 +80,7 @@ export const createEventAction = async (params: CreateEventParams) => {
             tags: params.tags && params.tags.length > 0 ? params.tags : ["Developer", "Tech"],
         });
 
+        revalidatePath("/");
         return { success: true, event: JSON.parse(JSON.stringify(newEvent)) };
     } catch (error) {
         console.error("Failed to create event:", error);
