@@ -270,4 +270,8 @@
       }
     }
   }
+
+  .color-scheme-dark {
+    color-scheme: dark;
+  }
 }
