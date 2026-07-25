@@ -1,7 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { getDashboardEventsAction } from "@/lib/actions/events.actions";
-import EventTableActions from "@/components/EventTableActions";
+import EventTableRow from "@/components/EventTableRow";
 
 export const dynamic = "force-dynamic";
 
@@ -58,57 +57,7 @@ export default async function EventDashboardPage({ searchParams }: DashboardPage
             <tbody className="divide-y divide-[#182830]/80">
               {paginatedEvents.length > 0 ? (
                 paginatedEvents.map((event) => (
-                  <tr
-                    key={event._id}
-                    className="hover:bg-[#122027]/50 transition-colors text-sm text-light-100"
-                  >
-                    {/* Events Title & Thumbnail */}
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-10 h-10 rounded-md overflow-hidden bg-dark-200 shrink-0 border border-[#182830]">
-                          <Image
-                            src={event.image || "/icons/logo.png"}
-                            alt={event.title}
-                            fill
-                            sizes="40px"
-                            className="object-cover"
-                          />
-                        </div>
-                        <span className="font-semibold text-white line-clamp-1">
-                          {event.title}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Location */}
-                    <td className="py-4 px-6 text-light-200">
-                      {event.location || event.venue || "Online"}
-                    </td>
-
-                    {/* Date */}
-                    <td className="py-4 px-6 text-light-200">
-                      {event.date || "TBD"}
-                    </td>
-
-                    {/* Time */}
-                    <td className="py-4 px-6 text-light-200">
-                      {event.time || "10:00 AM"}
-                    </td>
-
-                    {/* Booked Spot */}
-                    <td className="py-4 px-6 text-light-100 font-medium">
-                      {event.bookedCount ?? 400}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="py-4 px-6 text-right">
-                      <EventTableActions
-                        eventId={event._id}
-                        slug={event.slug}
-                        title={event.title}
-                      />
-                    </td>
-                  </tr>
+                  <EventTableRow key={event._id} event={event} />
                 ))
               ) : (
                 <tr>
