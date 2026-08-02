@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,19 +22,23 @@ interface EventTableRowProps {
 
 export default function EventTableRow({ event }: EventTableRowProps) {
   const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleRowClick = (e: React.MouseEvent) => {
     // If the click originated inside the actions cell (Edit/Delete), do not navigate via row click
     if ((e.target as HTMLElement).closest(".actions-cell")) {
       return;
     }
+    setIsNavigating(true);
     router.push(`/events/${event.slug}`);
   };
 
   return (
     <tr
       onClick={handleRowClick}
-      className="hover:bg-[#122027]/70 transition-colors text-sm text-light-100 cursor-pointer group"
+      className={`transition-all text-sm text-light-100 cursor-pointer group ${
+        isNavigating ? "bg-[#182830] opacity-60 animate-pulse" : "hover:bg-[#122027]/70"
+      }`}
     >
       {/* Events Title & Thumbnail */}
       <td className="py-4 px-6">
@@ -47,13 +52,21 @@ export default function EventTableRow({ event }: EventTableRowProps) {
               className="object-cover"
             />
           </div>
-          <Link
-            href={`/events/${event.slug}`}
-            className="font-semibold text-white group-hover:text-[#59deca] transition-colors line-clamp-1 hover:underline"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {event.title}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/events/${event.slug}`}
+              className="font-semibold text-white group-hover:text-[#59deca] transition-colors line-clamp-1 hover:underline"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsNavigating(true);
+              }}
+            >
+              {event.title}
+            </Link>
+            {isNavigating && (
+              <span className="w-3.5 h-3.5 border-2 border-[#59deca] border-t-transparent rounded-full animate-spin shrink-0" />
+            )}
+          </div>
         </div>
       </td>
 
