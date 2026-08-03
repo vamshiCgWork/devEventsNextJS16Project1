@@ -1,9 +1,10 @@
-import React from 'react'
+import Link from "next/link";
 import {notFound} from "next/navigation";
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import {IEvent} from "@/database";
 import {getEventBySlug, getSimilarEventsBySlug} from "@/lib/actions/events.actions";
+import {getBookingCount} from "@/lib/actions/booking.actions";
 import EventCard from "@/components/EventCard";
 
 const Page =async ({params}:{params:Promise<{slug:string}>}) => {
@@ -14,6 +15,8 @@ const Page =async ({params}:{params:Promise<{slug:string}>}) => {
     ]);
 
     if (!data) return notFound();
+
+    const bookings = await getBookingCount(data._id);
 
     const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; label: string; }) => (
         <div className="flex-row-gap-2 items-center">
@@ -42,10 +45,6 @@ const Page =async ({params}:{params:Promise<{slug:string}>}) => {
     )
 
     const { description, image, overview, date, time, location, mode, agenda, audience, tags, organizer } = data;
-
-    const bookings = 10;
-
-    //const similarEvents :IEvent[] = await getSimilarEventsBySlug(slug)
     return (
         <section id="event">
             <div className="header">
@@ -94,6 +93,15 @@ const Page =async ({params}:{params:Promise<{slug:string}>}) => {
                         )}
 
                         <BookEvent eventId={data._id} slug={data.slug} />
+
+                        <div className="pt-2 border-t border-border-dark text-center">
+                            <Link
+                                href={`/events/${data.slug}/book`}
+                                className="text-xs text-[#59deca] hover:underline font-medium inline-flex items-center gap-1"
+                            >
+                                Open Dedicated Booking Page →
+                            </Link>
+                        </div>
                     </div>
                 </aside>
             </div>

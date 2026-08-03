@@ -34,26 +34,19 @@ const bookingSchema = new Schema<IBooking>(
 // Create index on eventId for faster queries
 bookingSchema.index({ eventId: 1 });
 
-// Pre-save hook to validate that the referenced event exists
-bookingSchema.pre("save", async function (next) {
+bookingSchema.pre("save", async function () {
   if (this.isModified("eventId") || this.isNew) {
     try {
       const eventExists = await Event.findById(this.eventId);
       if (!eventExists) {
-
-            new Error(`Event with ID ${this.eventId} does not exist`)
-
+        throw new Error(`Event with ID ${this.eventId} does not exist`);
       }
     } catch (error) {
-
-          new Error(
-              `Error validating event: ${error instanceof Error ? error.message : "Unknown error"}`
-
+      throw new Error(
+        `Error validating event: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     }
   }
-
-
 });
 
 // Create or retrieve the Booking model
