@@ -1,7 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getCurrentUser } from "@/lib/actions/auth.actions";
+import UserNav from "@/components/UserNav";
 
-const Navbar = () => {
+const Navbar = async () => {
+    const user = await getCurrentUser();
+
     return (
     <header>
         <nav>
@@ -14,9 +18,11 @@ const Navbar = () => {
                 <Link href="/">Home</Link>
                 <Link href="/events">Events</Link>
                 <Link href="/events/create">Create Event</Link>
+                <UserNav user={user} />
             </ul>
         </nav>
     </header>
-    )
-}
-export default Navbar
+    );
+};
+
+export default Navbar;
