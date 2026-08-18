@@ -91,7 +91,7 @@ const eventSchema = new Schema<IEvent>(
       required: [true, "Event tags are required"],
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Generate URL-friendly slug from title
@@ -123,21 +123,18 @@ eventSchema.pre("save", function (next) {
   if (this.isModified("time")) {
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(this.time)) {
-        throw new Error("Time must be in HH:MM format");
+      throw new Error("Time must be in HH:MM format");
     }
   }
 
   // Validate that required array fields are not empty
   if (this.agenda.length === 0) {
-
-      throw new Error("Agenda must contain at least one item");
+    throw new Error("Agenda must contain at least one item");
   }
 
   if (this.tags.length === 0) {
-
-      throw new Error("Tags must contain at least one item");
+    throw new Error("Tags must contain at least one item");
   }
-
 });
 
 // Create or retrieve the Event model

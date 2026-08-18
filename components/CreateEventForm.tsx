@@ -1,9 +1,19 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Calendar, Clock, MapPin, ChevronDown, Upload, Tag, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
-import { createEventAction } from '@/lib/actions/events.actions';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  ChevronDown,
+  Upload,
+  Tag,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
+import { createEventAction } from "@/lib/actions/events.actions";
 
 export default function CreateEventForm() {
   const router = useRouter();
@@ -12,22 +22,28 @@ export default function CreateEventForm() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Form state
-  const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [location, setLocation] = useState('');
-  const [mode, setMode] = useState<'online' | 'offline' | 'hybrid'>('online');
-  const [image, setImage] = useState('');
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [location, setLocation] = useState("");
+  const [mode, setMode] = useState<"online" | "offline" | "hybrid">("online");
+  const [image, setImage] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState<string[]>(['react', 'next', 'js']);
-  const [description, setDescription] = useState('');
+  const [tagInput, setTagInput] = useState("");
+  const [tags, setTags] = useState<string[]>(["react", "next", "js"]);
+  const [description, setDescription] = useState("");
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Handle image upload / URL selection
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setImage(val);
-    if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) {
+    if (
+      val.startsWith("http://") ||
+      val.startsWith("https://") ||
+      val.startsWith("data:")
+    ) {
       setImagePreview(val);
     } else {
       setImagePreview(null);
@@ -35,26 +51,56 @@ export default function CreateEventForm() {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setImage(result);
-        setImagePreview(result);
-      };
-      reader.readAsDataURL(file);
-    }
+    const target = e.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (!file) return;
+    // const reader = new FileReader();
+    // reader.onloadend = () => {
+    //   const result = reader.result as string;
+    //   setImage(result);
+    //   setImagePreview(result);
+    // };
+    // reader.readAsDataURL(file);
+
+    setSelectedFile(file);
+    setImage(URL.createObjectURL(file));
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const uploadFileToImageKit = async (file: File): Promise<string> => {
+    // 1. Fetch auth token
+    const authRes = await fetch("/api/imagekit-auth");
+    const { token, expire, signature } = await authRes.json();
+    // 2. Prepare upload payload
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("fileName", file.name);
+    formData.append("publicKey", process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!);
+    formData.append("signature", signature);
+    formData.append("expire", expire.toString());
+    formData.append("token", token);
+    // 3. Upload to ImageKit
+    const uploadRes = await fetch(
+      "https://upload.imagekit.io/api/v1/files/upload",
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+    const data = await uploadRes.json();
+    if (!data.url) throw new Error(data.message || "Failed to upload image");
+    return data.url;
   };
 
   // Tag helper
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
-      const newTag = tagInput.trim().replace(/^#/, '');
+      const newTag = tagInput.trim().replace(/^#/, "");
       if (newTag && !tags.includes(newTag)) {
         setTags([...tags, newTag]);
-        setTagInput('');
+        setTagInput("");
       }
     }
   };
@@ -68,26 +114,25 @@ export default function CreateEventForm() {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
-
     // Validation
     if (!title.trim()) {
-      setErrorMsg('Event title is required.');
+      setErrorMsg("Event title is required.");
       return;
     }
     if (!date) {
-      setErrorMsg('Event date is required.');
+      setErrorMsg("Event date is required.");
       return;
     }
     if (!time) {
-      setErrorMsg('Event start time is required.');
+      setErrorMsg("Event start time is required.");
       return;
     }
     if (!location.trim()) {
-      setErrorMsg('Venue or online link is required.');
+      setErrorMsg("Venue or online link is required.");
       return;
     }
     if (!description.trim()) {
-      setErrorMsg('Event description is required.');
+      setErrorMsg("Event description is required.");
       return;
     }
 
@@ -95,8 +140,20 @@ export default function CreateEventForm() {
 
     try {
       // Default image if none provided
-      const finalImage = image.trim() || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&auto=format&fit=crop';
-      const finalTags = tags.length > 0 ? tags : ['tech', 'event'];
+      let finalImage;
+
+      if (selectedFile) {
+        finalImage = await uploadFileToImageKit(selectedFile);
+      } else if (image.trim()) {
+        // If image URL provided
+        finalImage = image.trim();
+      } else {
+        // Default fallback
+        finalImage =
+          "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&auto=format&fit=crop";
+      }
+
+      const finalTags = tags.length > 0 ? tags : ["tech", "event"];
 
       const res = await createEventAction({
         title,
@@ -108,21 +165,25 @@ export default function CreateEventForm() {
         tags: finalTags,
         description,
         overview: description,
-        audience: 'Developers & Tech Enthusiasts',
-        organizer: 'DevEvent Community',
-        agenda: ['Welcome & Introduction', 'Main Presentation', 'Interactive Q&A Session'],
+        audience: "Developers & Tech Enthusiasts",
+        organizer: "DevEvent Community",
+        agenda: [
+          "Welcome & Introduction",
+          "Main Presentation",
+          "Interactive Q&A Session",
+        ],
       });
 
       if (res.success && res.event) {
-        setSuccessMsg('Event created successfully! Redirecting...');
+        setSuccessMsg("Event created successfully! Redirecting...");
         setTimeout(() => {
           router.push(`/events/${res.event.slug}`);
         }, 1200);
       } else {
-        setErrorMsg(res.error || 'Failed to create event. Please try again.');
+        setErrorMsg(res.error || "Failed to create event. Please try again.");
       }
     } catch (err: any) {
-      setErrorMsg(err?.message || 'An unexpected error occurred.');
+      setErrorMsg(err?.message || "An unexpected error occurred.");
     } finally {
       setIsSubmitting(false);
     }
@@ -200,7 +261,10 @@ export default function CreateEventForm() {
 
       {/* 4. Event Location / Venue */}
       <div className="space-y-2">
-        <label htmlFor="location" className="block text-sm font-medium text-white">
+        <label
+          htmlFor="location"
+          className="block text-sm font-medium text-white"
+        >
           Event Location
         </label>
         <div className="relative">
@@ -276,11 +340,15 @@ export default function CreateEventForm() {
           {imagePreview && (
             <div className="relative w-full h-40 rounded-lg overflow-hidden border border-[#243B47] bg-[#182830]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imagePreview} alt="Banner Preview" className="w-full h-full object-cover" />
+              <img
+                src={imagePreview}
+                alt="Banner Preview"
+                className="w-full h-full object-cover"
+              />
               <button
                 type="button"
                 onClick={() => {
-                  setImage('');
+                  setImage("");
                   setImagePreview(null);
                 }}
                 className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white text-xs px-2 py-1 rounded backdrop-blur-sm transition-all"
@@ -335,7 +403,10 @@ export default function CreateEventForm() {
 
       {/* 8. Event Description */}
       <div className="space-y-2">
-        <label htmlFor="description" className="block text-sm font-medium text-white">
+        <label
+          htmlFor="description"
+          className="block text-sm font-medium text-white"
+        >
           Event Description
         </label>
         <div className="relative">
