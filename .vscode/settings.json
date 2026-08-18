@@ -1,5 +1,6 @@
 {
-    "workbench.preferredDarkColorTheme": "Default Dark Modern",
-    "workbench.colorTheme": "One Dark Pro Darker",
-    "workbench.preferredHighContrastColorTheme": "Default Dark Modern"
+  "workbench.preferredDarkColorTheme": "Default Dark Modern",
+  "workbench.colorTheme": "One Dark Pro Darker",
+  "workbench.preferredHighContrastColorTheme": "Default Dark Modern",
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
